@@ -1,0 +1,13 @@
+Python is a popular programming language used in
+artificial intelligence and machine learning.
+
+Machine learning allows computers to learn patterns
+from data.
+
+Generative AI can create text, images, audio and
+other types of content.
+
+RAG allows large language models to use information
+from external documents.
+
+AWS provides cloud services such as EC2, S3 and Lambda.

@@ -1,0 +1,10 @@
+Software engineering skills include Python, Java, SQL,
+data structures and algorithms, object-oriented programming,
+Git, REST APIs, databases and cloud computing.
+
+Generative AI roles may require knowledge of large language models,
+embeddings, vector databases, RAG, prompt engineering and
+frameworks such as LangChain and LangGraph.
+
+Good software engineers should also develop communication,
+problem solving, teamwork and continuous learning skills.

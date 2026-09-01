@@ -1,0 +1,13 @@
+Software engineering roles can include Software Engineer,
+Backend Developer, Full Stack Developer, Data Engineer,
+Machine Learning Engineer and Generative AI Engineer.
+
+Software Engineer roles commonly involve programming,
+debugging, testing, version control and working with software systems.
+
+Generative AI Engineer roles may involve LLM applications,
+RAG systems, embeddings, vector databases, prompt engineering
+and AI application development.
+
+Data Engineer roles commonly involve data pipelines,
+databases, SQL, ETL processes and cloud platforms.
