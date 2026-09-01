@@ -1,31 +1,33 @@
 import os
 
 from dotenv import load_dotenv
-from google import genai
+
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.prompts import PromptTemplate
 
 
-# Load API key
+# --------------------------------------------------
+# 1. Setup
+# --------------------------------------------------
+
 load_dotenv()
 
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
-
-
-# Get user information
-skills = input(
-    "Enter your current skills separated by commas: "
-)
-
-target_role = input(
-    "Enter your target role: "
-)
-
-
-# Ask Gemini to analyze the skill gap
-response = client.models.generate_content(
+llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
-    contents=f"""
+    google_api_key=os.getenv("GEMINI_API_KEY")
+)
+
+
+# --------------------------------------------------
+# 2. Create Prompt
+# --------------------------------------------------
+
+skill_gap_prompt = PromptTemplate(
+    input_variables=[
+        "skills",
+        "target_role"
+    ],
+    template="""
 You are a career guidance assistant.
 
 Analyze the skill gap between the user's current
@@ -48,7 +50,52 @@ Keep the answer practical and suitable for a fresher.
 )
 
 
-print("\nSkill Gap Analysis")
-print("------------------")
+# --------------------------------------------------
+# 3. Create Chain
+# --------------------------------------------------
 
-print(response.text)
+skill_gap_chain = skill_gap_prompt | llm
+
+
+# --------------------------------------------------
+# 4. Skill Gap Function
+# --------------------------------------------------
+
+def analyze_skill_gap(
+    skills,
+    target_role
+):
+
+    response = skill_gap_chain.invoke({
+
+        "skills": skills,
+
+        "target_role": target_role
+    })
+
+    return response.content
+
+
+# --------------------------------------------------
+# 5. Test the Function
+# --------------------------------------------------
+
+if __name__ == "__main__":
+
+    skills = input(
+        "Enter your current skills separated by commas: "
+    )
+
+    target_role = input(
+        "Enter your target role: "
+    )
+
+    result = analyze_skill_gap(
+        skills,
+        target_role
+    )
+
+    print("\nSkill Gap Analysis")
+    print("------------------")
+
+    print(result)

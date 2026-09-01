@@ -1,4 +1,5 @@
 from typing import TypedDict
+from skill_gap import analyze_skill_gap
 
 from langgraph.graph import StateGraph, START, END
 
@@ -20,8 +21,13 @@ class CareerState(TypedDict):
 
 def skill_gap_node(state: CareerState):
 
+    result = analyze_skill_gap(
+        state["question"],
+        state["target_role"]
+    )
+
     return {
-        "result": "Skill Gap Analysis selected."
+        "result": result
     }
 
 
