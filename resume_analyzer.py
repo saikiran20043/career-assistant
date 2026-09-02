@@ -89,57 +89,8 @@ retriever = vectorstore.as_retriever(
     }
 )
 
-
 # --------------------------------------------------
-# 6. Get Resume
-# --------------------------------------------------
-
-resume_path = input(
-    "\nEnter the path to your resume PDF: "
-)
-
-loader = PyPDFLoader(resume_path)
-
-resume_documents = loader.load()
-
-resume = "\n\n".join(
-    document.page_content
-    for document in resume_documents
-)
-
-print("\nResume loaded successfully.")
-print(
-    "Number of pages:",
-    len(resume_documents)
-)
-
-
-target_role = input(
-    "\nEnter your target role: "
-)
-
-
-# --------------------------------------------------
-# 7. Retrieve Role Information
-# --------------------------------------------------
-
-search_query = f"""
-Skills, responsibilities and requirements
-for the role of {target_role}.
-"""
-
-retrieved_documents = retriever.invoke(
-    search_query
-)
-
-context = "\n\n".join(
-    document.page_content
-    for document in retrieved_documents
-)
-
-
-# --------------------------------------------------
-# 8. Resume Analysis Prompt
+# 6. Resume Analysis Prompt
 # --------------------------------------------------
 
 resume_prompt = PromptTemplate(
@@ -177,33 +128,73 @@ Be practical and concise.
 )
 
 
-# --------------------------------------------------
-# 9. Create LangChain Chain
-# --------------------------------------------------
 
 resume_chain = resume_prompt | llm
+# --------------------------------------------------
+# 6. Analyze Resume
+# --------------------------------------------------
+
+def analyze_resume(resume_path, target_role):
+
+    # Load resume PDF
+    loader = PyPDFLoader(resume_path)
+
+    resume_documents = loader.load()
+
+    resume = "\n\n".join(
+        document.page_content
+        for document in resume_documents
+    )
+
+    # Retrieve role information
+    search_query = f"""
+    Skills, responsibilities and requirements
+    for the role of {target_role}.
+    """
+
+    retrieved_documents = retriever.invoke(
+        search_query
+    )
+
+    context = "\n\n".join(
+        document.page_content
+        for document in retrieved_documents
+    )
+
+    # Analyze resume
+    response = resume_chain.invoke({
+
+        "resume": resume,
+
+        "target_role": target_role,
+
+        "context": context
+    })
+
+    return response.content
 
 
 # --------------------------------------------------
-# 10. Analyze Resume
+# 7. Standalone Testing
 # --------------------------------------------------
 
-response = resume_chain.invoke({
+if __name__ == "__main__":
 
-    "resume": resume,
+    resume_path = input(
+        "\nEnter the path to your resume PDF: "
+    )
 
-    "target_role": target_role,
+    target_role = input(
+        "\nEnter your target role: "
+    )
 
-    "context": context
-})
+    result = analyze_resume(
+        resume_path,
+        target_role
+    )
 
+    print("\n================================")
+    print("        RESUME ANALYSIS")
+    print("================================")
 
-# --------------------------------------------------
-# 11. Display Analysis
-# --------------------------------------------------
-
-print("\n================================")
-print("        RESUME ANALYSIS")
-print("================================")
-
-print(response.content)
+    print(result)

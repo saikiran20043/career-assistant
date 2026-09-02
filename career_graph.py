@@ -1,5 +1,6 @@
 from typing import TypedDict
 from skill_gap import analyze_skill_gap
+from resume_analyzer import analyze_resume
 
 from langgraph.graph import StateGraph, START, END
 
@@ -12,6 +13,7 @@ class CareerState(TypedDict):
 
     question: str
     target_role: str
+    resume_path: str
     result: str
 
 
@@ -34,13 +36,16 @@ def skill_gap_node(state: CareerState):
 # --------------------------------------------------
 # 3. Resume Analysis Node
 # --------------------------------------------------
-
 def resume_analysis_node(state: CareerState):
 
-    return {
-        "result": "Resume Analysis selected."
-    }
+    result = analyze_resume(
+        state["resume_path"],
+        state["target_role"]
+    )
 
+    return {
+        "result": result
+    }
 
 # --------------------------------------------------
 # 4. Interview Preparation Node
@@ -159,14 +164,12 @@ question = input(
 target_role = input(
     "What is your target role? "
 )
-
+resume_path = input("Enter the path to your resume PDF: ")
 
 result = career_graph.invoke({
-
     "question": question,
-
     "target_role": target_role,
-
+    "resume_path": resume_path,
     "result": ""
 })
 
