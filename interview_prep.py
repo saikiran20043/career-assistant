@@ -91,36 +91,7 @@ retriever = vectorstore.as_retriever(
 
 
 # --------------------------------------------------
-# 6. Get Target Role
-# --------------------------------------------------
-
-target_role = input(
-    "\nEnter your target role: "
-)
-
-
-# --------------------------------------------------
-# 7. Retrieve Relevant Career Knowledge
-# --------------------------------------------------
-
-search_query = f"""
-Interview preparation, skills, responsibilities,
-and important topics for a {target_role}.
-"""
-
-retrieved_documents = retriever.invoke(
-    search_query
-)
-
-
-context = "\n\n".join(
-    document.page_content
-    for document in retrieved_documents
-)
-
-
-# --------------------------------------------------
-# 8. Create Interview Prompt
+# 6. Interview Prompt
 # --------------------------------------------------
 
 interview_prompt = PromptTemplate(
@@ -158,30 +129,58 @@ supported by the provided information.
 
 
 # --------------------------------------------------
-# 9. Create LangChain Chain
+# 7. Create LangChain Chain
 # --------------------------------------------------
 
 interview_chain = interview_prompt | llm
 
 
 # --------------------------------------------------
-# 10. Generate Preparation Plan
+# 8. Generate Interview Preparation
 # --------------------------------------------------
 
-response = interview_chain.invoke({
+def generate_interview_prep(target_role):
 
-    "target_role": target_role,
+    search_query = f"""
+    Interview preparation, skills, responsibilities,
+    and important topics for a {target_role}.
+    """
 
-    "context": context
-})
+    retrieved_documents = retriever.invoke(
+        search_query
+    )
+
+    context = "\n\n".join(
+        document.page_content
+        for document in retrieved_documents
+    )
+
+    response = interview_chain.invoke({
+
+        "target_role": target_role,
+
+        "context": context
+    })
+
+    return response.content
 
 
 # --------------------------------------------------
-# 11. Display Result
+# 9. Standalone Testing
 # --------------------------------------------------
 
-print("\n================================")
-print("      INTERVIEW PREPARATION")
-print("================================")
+if __name__ == "__main__":
 
-print(response.content)
+    target_role = input(
+        "\nEnter your target role: "
+    )
+
+    result = generate_interview_prep(
+        target_role
+    )
+
+    print("\n================================")
+    print("      INTERVIEW PREPARATION")
+    print("================================")
+
+    print(result)

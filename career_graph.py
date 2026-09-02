@@ -1,6 +1,7 @@
 from typing import TypedDict
 from skill_gap import analyze_skill_gap
 from resume_analyzer import analyze_resume
+from interview_prep import generate_interview_prep
 
 from langgraph.graph import StateGraph, START, END
 
@@ -50,11 +51,14 @@ def resume_analysis_node(state: CareerState):
 # --------------------------------------------------
 # 4. Interview Preparation Node
 # --------------------------------------------------
-
 def interview_prep_node(state: CareerState):
 
+    result = generate_interview_prep(
+        state["target_role"]
+    )
+
     return {
-        "result": "Interview Preparation selected."
+        "result": result
     }
 
 
