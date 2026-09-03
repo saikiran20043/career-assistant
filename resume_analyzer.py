@@ -1,15 +1,14 @@
 import os
 
 from dotenv import load_dotenv
-from langchain_community.document_loaders import TextLoader
+
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_google_genai import (
-    GoogleGenerativeAIEmbeddings,
-    ChatGoogleGenerativeAI
-)
+
+from langchain_google_genai import ChatGoogleGenerativeAI
+
 from langchain_core.prompts import PromptTemplate
-from langchain_chroma import Chroma
+
+from shared_rag import create_retriever
 
 
 # --------------------------------------------------
@@ -18,79 +17,16 @@ from langchain_chroma import Chroma
 
 load_dotenv()
 
-embedding_model = GoogleGenerativeAIEmbeddings(
-    model="models/gemini-embedding-001",
-    google_api_key=os.getenv("GEMINI_API_KEY")
-)
-
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
     google_api_key=os.getenv("GEMINI_API_KEY")
 )
 
-
-# --------------------------------------------------
-# 2. Load Career Knowledge
-# --------------------------------------------------
-
-documents = []
-
-for filename in os.listdir("Knowledge"):
-
-    if filename.endswith(".txt"):
-
-        file_path = os.path.join(
-            "Knowledge",
-            filename
-        )
-
-        loader = TextLoader(
-            file_path,
-            encoding="utf-8"
-        )
-
-        documents.extend(
-            loader.load()
-        )
+retriever = create_retriever()
 
 
 # --------------------------------------------------
-# 3. Split Knowledge
-# --------------------------------------------------
-
-splitter = RecursiveCharacterTextSplitter(
-    chunk_size=300,
-    chunk_overlap=50
-)
-
-chunks = splitter.split_documents(
-    documents
-)
-
-
-# --------------------------------------------------
-# 4. Create Vector Store
-# --------------------------------------------------
-
-vectorstore = Chroma.from_documents(
-    documents=chunks,
-    embedding=embedding_model,
-    collection_name="resume_analyzer"
-)
-
-
-# --------------------------------------------------
-# 5. Create Retriever
-# --------------------------------------------------
-
-retriever = vectorstore.as_retriever(
-    search_kwargs={
-        "k": 4
-    }
-)
-
-# --------------------------------------------------
-# 6. Resume Analysis Prompt
+# 2. Resume Analysis Prompt
 # --------------------------------------------------
 
 resume_prompt = PromptTemplate(
@@ -128,11 +64,16 @@ Be practical and concise.
 )
 
 
+# --------------------------------------------------
+# 3. Create LangChain Chain
+# --------------------------------------------------
 
 resume_chain = resume_prompt | llm
+
+
 # --------------------------------------------------
-# 6. Analyze Resume
-# --------------------------------------------------
+# 4. Analyze Resume
+# -------------------------rieve-------------------------
 
 def analyze_resume(resume_path, target_role):
 
@@ -152,7 +93,7 @@ def analyze_resume(resume_path, target_role):
     for the role of {target_role}.
     """
 
-    retrieved_documents = retriever.invoke(
+    retrieved_documents = retr.invoke(
         search_query
     )
 
@@ -163,11 +104,8 @@ def analyze_resume(resume_path, target_role):
 
     # Analyze resume
     response = resume_chain.invoke({
-
         "resume": resume,
-
         "target_role": target_role,
-
         "context": context
     })
 
@@ -175,7 +113,7 @@ def analyze_resume(resume_path, target_role):
 
 
 # --------------------------------------------------
-# 7. Standalone Testing
+# 5. Standalone Testing
 # --------------------------------------------------
 
 if __name__ == "__main__":

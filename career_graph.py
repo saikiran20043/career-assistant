@@ -11,8 +11,8 @@ from langgraph.graph import StateGraph, START, END
 # --------------------------------------------------
 
 class CareerState(TypedDict):
-
     question: str
+    skills: str
     target_role: str
     resume_path: str
     result: str
@@ -25,7 +25,7 @@ class CareerState(TypedDict):
 def skill_gap_node(state: CareerState):
 
     result = analyze_skill_gap(
-        state["question"],
+        state["skills"],
         state["target_role"]
     )
 
@@ -168,15 +168,19 @@ question = input(
 target_role = input(
     "What is your target role? "
 )
+skills = input(
+    "What are your current skills? "
+)
+
 resume_path = input("Enter the path to your resume PDF: ")
 
 result = career_graph.invoke({
     "question": question,
+    "skills": skills,
     "target_role": target_role,
     "resume_path": resume_path,
     "result": ""
 })
-
 
 print("\nResult:")
 print(result["result"])

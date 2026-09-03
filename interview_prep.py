@@ -2,14 +2,11 @@ import os
 
 from dotenv import load_dotenv
 
-from langchain_community.document_loaders import TextLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_google_genai import (
-    GoogleGenerativeAIEmbeddings,
-    ChatGoogleGenerativeAI
-)
+from langchain_google_genai import ChatGoogleGenerativeAI
+
 from langchain_core.prompts import PromptTemplate
-from langchain_chroma import Chroma
+
+from shared_rag import create_retriever
 
 
 # --------------------------------------------------
@@ -18,77 +15,12 @@ from langchain_chroma import Chroma
 
 load_dotenv()
 
-embedding_model = GoogleGenerativeAIEmbeddings(
-    model="models/gemini-embedding-001",
-    google_api_key=os.getenv("GEMINI_API_KEY")
-)
-
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
     google_api_key=os.getenv("GEMINI_API_KEY")
 )
 
-
-# --------------------------------------------------
-# 2. Load Career Knowledge
-# --------------------------------------------------
-
-documents = []
-
-for filename in os.listdir("Knowledge"):
-
-    if filename.endswith(".txt"):
-
-        file_path = os.path.join(
-            "Knowledge",
-            filename
-        )
-
-        loader = TextLoader(
-            file_path,
-            encoding="utf-8"
-        )
-
-        documents.extend(
-            loader.load()
-        )
-
-
-# --------------------------------------------------
-# 3. Split Documents
-# --------------------------------------------------
-
-splitter = RecursiveCharacterTextSplitter(
-    chunk_size=300,
-    chunk_overlap=50
-)
-
-chunks = splitter.split_documents(
-    documents
-)
-
-
-# --------------------------------------------------
-# 4. Create Vector Store
-# --------------------------------------------------
-
-vectorstore = Chroma.from_documents(
-    documents=chunks,
-    embedding=embedding_model,
-    collection_name="interview_prep"
-)
-
-
-# --------------------------------------------------
-# 5. Create Retriever
-# --------------------------------------------------
-
-retriever = vectorstore.as_retriever(
-    search_kwargs={
-        "k": 4
-    }
-)
-
+retriever = create_retriever()
 
 # --------------------------------------------------
 # 6. Interview Prompt
@@ -156,15 +88,11 @@ def generate_interview_prep(target_role):
     )
 
     response = interview_chain.invoke({
-
         "target_role": target_role,
-
         "context": context
     })
 
     return response.content
-
-
 # --------------------------------------------------
 # 9. Standalone Testing
 # --------------------------------------------------
