@@ -185,12 +185,30 @@ response = skill_gap_chain.invoke({
 })
 
 
-# --------------------------------------------------
-# 11. Display Result
+## --------------------------------------------------
+# 6. Test Shared Retriever
 # --------------------------------------------------
 
-print("\n================================")
-print("       SKILL GAP ANALYSIS")
-print("================================")
+if __name__ == "__main__":
 
-print(response.content)
+    retriever = create_retriever()
+
+    results = retriever.invoke(
+        "skills required for a Generative AI Engineer"
+    )
+
+    print("\nRetrieved Documents:")
+
+    for document in results:
+
+        print("\n-----------------------------")
+
+        print(document.page_content)
+
+        print(
+            "Source:",
+            document.metadata.get(
+                "source",
+                "Unknown"
+            )
+        )

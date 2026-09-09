@@ -161,26 +161,19 @@ career_graph = graph_builder.compile()
 # 10. Test
 # --------------------------------------------------
 
-question = input(
-    "What do you want help with? "
-)
+if __name__ == "__main__":
 
-target_role = input(
-    "What is your target role? "
-)
-skills = input(
-    "What are your current skills? "
-)
+    question = input("What do you want help with? ")
+    target_role = input("What is your target role? ")
+    skills = input("What are your current skills? ")
+    resume_path = input("Enter the path to your resume PDF: ")
 
-resume_path = input("Enter the path to your resume PDF: ")
+    result = career_graph.invoke({
+        "question": question,
+        "skills": skills,
+        "target_role": target_role,
+        "resume_path": resume_path,
+        "result": ""
+    })
 
-result = career_graph.invoke({
-    "question": question,
-    "skills": skills,
-    "target_role": target_role,
-    "resume_path": resume_path,
-    "result": ""
-})
-
-print("\nResult:")
-print(result["result"])
+    print(result["result"])

@@ -93,7 +93,7 @@ def analyze_resume(resume_path, target_role):
     for the role of {target_role}.
     """
 
-    retrieved_documents = retr.invoke(
+    retrieved_documents = retriever.invoke(
         search_query
     )
 
