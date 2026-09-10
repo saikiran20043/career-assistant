@@ -45,40 +45,44 @@ function InterviewPrep({ targetRole, setTargetRole }) {
   }
 
   return (
-    <div>
+    <div className="feature-content">
       <h2>Interview Preparation</h2>
 
       <form onSubmit={handleSubmit}>
         <input
+          className="form-input"
           placeholder="Target Role"
           value={targetRole}
           onChange={(e) => setTargetRole(e.target.value)}
         />
 
-        <br />
-        <br />
-
-        <button type="submit">
-          Prepare Interview
+        <button
+          className="primary-button"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Preparing..." : "Prepare Interview"}
         </button>
 
         {loading && (
-          <p>Preparing your interview...</p>
+          <p className="status-message">
+            Preparing your interview...
+          </p>
         )}
 
         {error && (
-          <p>{error}</p>
+          <p className="error-message">
+            {error}
+          </p>
         )}
       </form>
 
       {result && (
-        <>
-          <hr />
-
+        <div className="result-box">
           <h2>Interview Preparation Result</h2>
 
           <p>{result}</p>
-        </>
+        </div>
       )}
     </div>
   );

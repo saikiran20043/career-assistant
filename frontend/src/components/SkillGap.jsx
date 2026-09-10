@@ -43,49 +43,52 @@ function SkillGap({ targetRole, setTargetRole }) {
   }
 
   return (
-    <div>
+    <div className="feature-content">
       <h2>Skill Gap Analysis</h2>
 
       <form onSubmit={handleSubmit}>
+
         <input
+          className="form-input"
           placeholder="Target Role"
           value={targetRole}
           onChange={(e) => setTargetRole(e.target.value)}
         />
 
-        <br />
-        <br />
-
         <textarea
-          placeholder="Current Skills"
+          className="form-input form-textarea"
+          placeholder="Enter your current skills (e.g. Python, SQL, LangChain)"
           value={skills}
           onChange={(e) => setSkills(e.target.value)}
         />
 
-        <br />
-        <br />
-
-        <button type="submit">
-          Analyze Skill Gap
+        <button
+          className="primary-button"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Analyzing..." : "Analyze Skill Gap"}
         </button>
 
         {loading && (
-          <p>Analyzing your skills...</p>
+          <p className="status-message">
+            Analyzing your skills...
+          </p>
         )}
 
         {error && (
-          <p>{error}</p>
+          <p className="error-message">
+            {error}
+          </p>
         )}
       </form>
 
       {result && (
-        <>
-          <hr />
-
+        <div className="result-box">
           <h2>Skill Gap Result</h2>
 
           <p>{result}</p>
-        </>
+        </div>
       )}
     </div>
   );

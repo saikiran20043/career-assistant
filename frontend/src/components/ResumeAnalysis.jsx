@@ -9,7 +9,6 @@ function ResumeAnalysis({ targetRole, setTargetRole }) {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    // Check whether a resume was selected
     if (!resume) {
       setError("Please select your resume PDF.");
       return;
@@ -48,49 +47,51 @@ function ResumeAnalysis({ targetRole, setTargetRole }) {
   }
 
   return (
-    <div>
+    <div className="feature-content">
       <h2>Resume Analysis</h2>
 
       <form onSubmit={handleSubmit}>
         <input
+          className="form-input"
           placeholder="Target Role"
           value={targetRole}
           onChange={(e) => setTargetRole(e.target.value)}
         />
 
-        <br />
-        <br />
-
         <input
+          className="form-input"
           type="file"
           accept=".pdf"
           onChange={(e) => setResume(e.target.files[0])}
         />
 
-        <br />
-        <br />
-
-        <button type="submit">
-          Analyze Resume
+        <button
+          className="primary-button"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Analyzing..." : "Analyze Resume"}
         </button>
 
         {loading && (
-          <p>Analyzing your resume...</p>
+          <p className="status-message">
+            Analyzing your resume...
+          </p>
         )}
 
         {error && (
-          <p>{error}</p>
+          <p className="error-message">
+            {error}
+          </p>
         )}
       </form>
 
       {result && (
-        <>
-          <hr />
-
+        <div className="result-box">
           <h2>Resume Analysis Result</h2>
 
           <p>{result}</p>
-        </>
+        </div>
       )}
     </div>
   );

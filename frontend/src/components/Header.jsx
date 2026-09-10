@@ -1,8 +1,11 @@
 function Header() {
   return (
-    <header>
+    <header className="header">
       <h1>Career Assistant</h1>
-      <p>Your AI-powered career companion</p>
+
+      <p>
+        Your AI-powered career companion
+      </p>
     </header>
   );
 }
