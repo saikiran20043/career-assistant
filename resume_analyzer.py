@@ -1,40 +1,39 @@
 import os
 
 from dotenv import load_dotenv
-
 from langchain_community.document_loaders import PyPDFLoader
-
 from langchain_google_genai import ChatGoogleGenerativeAI
-
 from langchain_core.prompts import PromptTemplate
 
 from shared_rag import create_retriever
 
 
-# --------------------------------------------------
-# 1. Setup
-# --------------------------------------------------
-
 load_dotenv()
 
+
+# --------------------------------------------------
+# LLM
+# --------------------------------------------------
+
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
+    model="gemini-3.6-flash",
     google_api_key=os.getenv("GEMINI_API_KEY")
 )
+
+
+# --------------------------------------------------
+# Shared RAG Retriever
+# --------------------------------------------------
 
 retriever = create_retriever()
 
 
 # --------------------------------------------------
-# 2. Resume Analysis Prompt
+# Resume Analysis Prompt
 # --------------------------------------------------
 
 resume_prompt = PromptTemplate(
-    input_variables=[
-        "resume",
-        "target_role",
-        "context"
-    ],
+    input_variables=["resume", "target_role", "context"],
     template="""
 You are a career assistant helping a fresher
 evaluate their resume.
@@ -64,20 +63,15 @@ Be practical and concise.
 )
 
 
-# --------------------------------------------------
-# 3. Create LangChain Chain
-# --------------------------------------------------
-
 resume_chain = resume_prompt | llm
 
 
 # --------------------------------------------------
-# 4. Analyze Resume
-# -------------------------rieve-------------------------
+# Resume Analysis
+# --------------------------------------------------
 
 def analyze_resume(resume_path, target_role):
 
-    # Load resume PDF
     loader = PyPDFLoader(resume_path)
 
     resume_documents = loader.load()
@@ -87,52 +81,23 @@ def analyze_resume(resume_path, target_role):
         for document in resume_documents
     )
 
-    # Retrieve role information
     search_query = f"""
     Skills, responsibilities and requirements
     for the role of {target_role}.
     """
 
-    retrieved_documents = retriever.invoke(
-        search_query
-    )
+    retrieved_documents = retriever.invoke(search_query)
 
     context = "\n\n".join(
         document.page_content
         for document in retrieved_documents
     )
 
-    # Analyze resume
     response = resume_chain.invoke({
         "resume": resume,
         "target_role": target_role,
         "context": context
     })
 
+    # Convert Gemini/LangChain response into plain text
     return response.content
-
-
-# --------------------------------------------------
-# 5. Standalone Testing
-# --------------------------------------------------
-
-if __name__ == "__main__":
-
-    resume_path = input(
-        "\nEnter the path to your resume PDF: "
-    )
-
-    target_role = input(
-        "\nEnter your target role: "
-    )
-
-    result = analyze_resume(
-        resume_path,
-        target_role
-    )
-
-    print("\n================================")
-    print("        RESUME ANALYSIS")
-    print("================================")
-
-    print(result)

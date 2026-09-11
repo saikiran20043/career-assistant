@@ -1,74 +1,66 @@
 import os
 
 from dotenv import load_dotenv
-
 from langchain_google_genai import ChatGoogleGenerativeAI
-
 from langchain_core.prompts import PromptTemplate
 
 from shared_rag import create_retriever
 
 
-# --------------------------------------------------
-# 1. Setup
-# --------------------------------------------------
-
 load_dotenv()
 
+
+# --------------------------------------------------
+# LLM
+# --------------------------------------------------
+
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
+    model="gemini-3.6-flash",
     google_api_key=os.getenv("GEMINI_API_KEY")
 )
 
-retriever = create_retriever()
 
 # --------------------------------------------------
-# 6. Interview Prompt
+# Shared RAG Retriever
+# --------------------------------------------------
+
+retriever = create_retriever()
+
+
+# --------------------------------------------------
+# Interview Preparation Prompt
 # --------------------------------------------------
 
 interview_prompt = PromptTemplate(
-    input_variables=[
-        "target_role",
-        "context"
-    ],
+    input_variables=["target_role", "context"],
     template="""
-You are a career interview preparation assistant.
-
-Help a fresher prepare for the following target role:
+You are a career assistant helping a fresher
+prepare for a technical interview.
 
 Target role:
 {target_role}
 
-Use the following career knowledge:
-
+Career knowledge:
 {context}
 
-Create a practical interview preparation plan.
+Provide:
 
-Include:
-
-1. Important technical topics
+1. Important technical topics to study
 2. Five technical interview questions
 3. Three behavioral interview questions
-4. Important areas the candidate should focus on
-5. A short preparation strategy
+4. Important areas to focus on
+5. A short interview preparation strategy
 
-Use the provided career knowledge.
-Do not invent specific requirements that are not
-supported by the provided information.
+Keep the answer practical and suitable for a fresher.
 """
 )
 
-
-# --------------------------------------------------
-# 7. Create LangChain Chain
-# --------------------------------------------------
 
 interview_chain = interview_prompt | llm
 
 
 # --------------------------------------------------
-# 8. Generate Interview Preparation
+# Interview Preparation
 # --------------------------------------------------
 
 def generate_interview_prep(target_role):
@@ -78,9 +70,7 @@ def generate_interview_prep(target_role):
     and important topics for a {target_role}.
     """
 
-    retrieved_documents = retriever.invoke(
-        search_query
-    )
+    retrieved_documents = retriever.invoke(search_query)
 
     context = "\n\n".join(
         document.page_content
@@ -93,22 +83,4 @@ def generate_interview_prep(target_role):
     })
 
     return response.content
-# --------------------------------------------------
-# 9. Standalone Testing
-# --------------------------------------------------
-
-if __name__ == "__main__":
-
-    target_role = input(
-        "\nEnter your target role: "
-    )
-
-    result = generate_interview_prep(
-        target_role
-    )
-
-    print("\n================================")
-    print("      INTERVIEW PREPARATION")
-    print("================================")
-
-    print(result)
+    
