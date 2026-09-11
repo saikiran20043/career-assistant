@@ -23,7 +23,7 @@ embedding_model = GoogleGenerativeAIEmbeddings(
 # 2. Load Career Knowledge
 # --------------------------------------------------
 
-def load_documents(folder_path="Knowledge"):
+def load_documents(folder_path="knowledge"):
 
     documents = []
 
