@@ -13,6 +13,9 @@ from langchain_chroma import Chroma
 
 load_dotenv()
 
+CHROMA_PATH = "chroma_db"
+
+
 embedding_model = GoogleGenerativeAIEmbeddings(
     model="models/gemini-embedding-001",
     google_api_key=os.getenv("GEMINI_API_KEY")
@@ -23,7 +26,7 @@ embedding_model = GoogleGenerativeAIEmbeddings(
 # 2. Load Career Knowledge
 # --------------------------------------------------
 
-def load_documents(folder_path="knowledge"):
+def load_documents(folder_path="Knowledge"):
 
     documents = []
 
@@ -73,7 +76,8 @@ def create_vectorstore(chunks):
     return Chroma.from_documents(
         documents=chunks,
         embedding=embedding_model,
-        collection_name="career_knowledge"
+        collection_name="career_knowledge",
+        persist_directory=CHROMA_PATH
     )
 
 
@@ -83,29 +87,45 @@ def create_vectorstore(chunks):
 
 def create_retriever():
 
-    documents = load_documents()
-
-    print(
-        "Number of documents:",
-        len(documents)
+    vectorstore = Chroma(
+        collection_name="career_knowledge",
+        embedding_function=embedding_model,
+        persist_directory=CHROMA_PATH
     )
 
-    chunks = chunk_documents(
-        documents
-    )
+    if vectorstore._collection.count() == 0:
 
-    print(
-        "Number of chunks:",
-        len(chunks)
-    )
+        print("Creating knowledge base for the first time...")
 
-    vectorstore = create_vectorstore(
-        chunks
-    )
+        documents = load_documents()
 
-    print(
-        "Shared knowledge base successfully created."
-    )
+        print(
+            "Number of documents:",
+            len(documents)
+        )
+
+        chunks = chunk_documents(
+            documents
+        )
+
+        print(
+            "Number of chunks:",
+            len(chunks)
+        )
+
+        vectorstore = create_vectorstore(
+            chunks
+        )
+
+        print(
+            "Knowledge base created and persisted."
+        )
+
+    else:
+
+        print(
+            "Existing knowledge base found. Reusing it."
+        )
 
     return vectorstore.as_retriever(
         search_kwargs={
